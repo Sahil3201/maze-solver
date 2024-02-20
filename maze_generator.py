@@ -24,6 +24,8 @@ class Cell(object):
         self.y = y
         self._visited = visited
         self._state = state  # either 'w'(wall) or 'p'(passage)
+        self.g_score = float('inf')
+        self.f_score = float('inf')
 
     def __str__(self):
         return f'({self.y},{self.x},{self._state})'
@@ -75,6 +77,8 @@ class Maze(object):
         self.w = w
         self.h = h
         self.rows = []
+        self.start = None
+        self.end = None
         for i in range(h):
             self.rows.append(Row(row_length=w, row_no=i))
 
@@ -105,10 +109,12 @@ class Maze(object):
                 end = self[self.h-1][self.w-1-i]
         start.set_state('s')
         end.set_state('e')
+        self.start = start
+        self.end = end
         return start, end
 
     def visualize_maze(self, path=None):
-        cell_size = 3
+        cell_size = 4
         pygame.init()
         size = (self.w*cell_size, self.h*cell_size)
 
@@ -153,11 +159,12 @@ def get_surrounding_cells(maze, cell, w, h):
     return ret
 
 
-def prims_algo(w=20, h=20):
+def prims_algo(w=20, h=20, maze=None):
     if (w < 4 or h < 4):
         print("Width or Height should be more than 4. Exiting")
         exit()
-    maze = Maze(w, h)
+    if not maze:
+        maze = Maze(w, h)
     start_x = random.randint(1, w-2)
     start_y = random.randint(1, h-2)
     maze[start_y][start_x].set_state('p')
