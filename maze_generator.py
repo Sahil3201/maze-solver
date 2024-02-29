@@ -1,13 +1,13 @@
-# Maze terminology:
-# Cell: Any pixel in maze which can be either wall or passage
-# Passage: 'p'
-# Wall: 'w'
-# Start: 's'
-# End: 'e'
-# Route: 'r'
-#
-# Maze generation algo implemented: Iterative Randomized Prim's Algo
-################
+""" Maze terminology:
+    Cell: Any pixel in maze which can be either wall or passage
+    Passage: 'p'
+    Wall: 'w'
+    Start: 's'
+    End: 'e'
+    Route: 'r'
+
+    Maze generation algo implemented: Iterative Randomized Prim's Algo
+"""
 
 import random
 import argparse
@@ -48,11 +48,11 @@ class Cell(object):
 
 
 class Row(object):
-    def __init__(self, row_length, row_no):
+    def __init__(self, row_length, row_no, CellDef):
         self.cell_list = []
         self.row_no = row_no
         for i in range(row_length):
-            self.cell_list.append(Cell(x=i, y=self.row_no))
+            self.cell_list.append(CellDef(x=i, y=self.row_no))
 
     def __getitem__(self, index):
         return self.cell_list[index]
@@ -73,14 +73,14 @@ class Row(object):
 
 
 class Maze(object):
-    def __init__(self, w, h):
+    def __init__(self, w, h, CellDef=Cell):
         self.w = w
         self.h = h
         self.rows = []
         self.start = None
         self.end = None
         for i in range(h):
-            self.rows.append(Row(row_length=w, row_no=i))
+            self.rows.append(Row(row_length=w, row_no=i, CellDef=CellDef))
 
     def __getitem__(self, index):
         return self.rows[index]
@@ -114,7 +114,7 @@ class Maze(object):
         return start, end
 
     def visualize_maze(self, path=None):
-        cell_size = 4
+        cell_size = 6
         pygame.init()
         size = (self.w*cell_size, self.h*cell_size)
 
