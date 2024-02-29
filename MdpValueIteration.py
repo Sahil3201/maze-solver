@@ -77,6 +77,8 @@ class MdpMaze(maze_generator.Maze):
         # plt.show()
 
     def visualize_maze_matplotlib(self):
+        arrow_symbols = {'U': '↑', 'D': '↓', 'R': '→', 'L': '←'}
+
         for row in self.maze.rows:
             for cell in row:
                 if cell.get_state() == 'w':
@@ -84,19 +86,19 @@ class MdpMaze(maze_generator.Maze):
                 else:
                     plt.fill_between([cell.x, cell.x + 0.5], cell.y, cell.y + 1, color='white', edgecolor='black')
                     plt.fill_between([cell.x + 0.5, cell.x + 1], cell.y, cell.y + 1, color='white', edgecolor='black')
-                    # plt.fill_between([cell.x + 0.5, cell.x + 0.75], cell.y, cell.y + 1, color='white', edgecolor='black')
-                    # plt.fill_between([cell.x + 0.75, cell.x + 1], cell.y, cell.y + 1, color='white', edgecolor='black')
 
-                    plt.text(cell.x + 0.33, cell.y + 0.5, str(round(cell.value, 3)), fontsize=8, ha='center', va='center', color='black')
-                    plt.text(cell.x + 0.66, cell.y + 0.5, str(cell.policy), fontsize=8, ha='center', va='center', color='black')
-                    # plt.text(cell.x + 0.625, cell.y + 0.5, str(cell.x), fontsize=8, ha='center', va='center', color='black')
-                    # plt.text(cell.x + 0.875, cell.y + 0.5, str(cell.y), fontsize=8, ha='center', va='center', color='black')
+                    value_text = str(round(cell.value, 3))
+                    policy_text = arrow_symbols.get(cell.policy, str(cell.policy))
 
-        plt.title('Maze Visualization with Values')
+                    plt.text(cell.x + 0.33, cell.y + 0.5, value_text, fontsize=8, ha='center', va='center', color='black')
+                    plt.text(cell.x + 0.66, cell.y + 0.5, policy_text, fontsize=8, ha='center', va='center', color='black')
+
+        plt.title('MDP Value Iteration Maze Visualization')
         plt.xlabel('X-axis')
         plt.gca().invert_yaxis()
         plt.ylabel('Y-axis')
         plt.show()
+
 
 
 
