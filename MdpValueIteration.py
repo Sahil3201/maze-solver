@@ -76,7 +76,30 @@ class MdpMaze(maze_generator.Maze):
     #     plt.gca().invert_yaxis()
         # plt.show()
 
-    def visualize_maze_matplotlib(self):
+    # def visualize_maze_matplotlib(self):
+    #     arrow_symbols = {'U': '↑', 'D': '↓', 'R': '→', 'L': '←'}
+
+    #     for row in self.maze.rows:
+    #         for cell in row:
+    #             if cell.get_state() == 'w':
+    #                 plt.fill_between([cell.x, cell.x + 1], cell.y, cell.y + 1, color='black')
+    #             else:
+    #                 plt.fill_between([cell.x, cell.x + 0.5], cell.y, cell.y + 1, color='white', edgecolor='black')
+    #                 plt.fill_between([cell.x + 0.5, cell.x + 1], cell.y, cell.y + 1, color='white', edgecolor='black')
+
+    #                 value_text = str(round(cell.value, 3))
+    #                 policy_text = arrow_symbols.get(cell.policy, str(cell.policy))
+
+    #                 # plt.text(cell.x + 0.33, cell.y + 0.5, value_text, fontsize=8, ha='center', va='center', color='black')
+    #                 plt.text(cell.x + 0.66, cell.y + 0.5, policy_text, fontsize=8, ha='center', va='center', color='black')
+
+    #     plt.title('MDP Value Iteration Maze Visualization')
+    #     plt.xlabel('X-axis')
+    #     plt.gca().invert_yaxis()
+    #     plt.ylabel('Y-axis')
+    #     plt.show()
+
+    def visualize_maze_matplotlib(self, optimal_path=None):
         arrow_symbols = {'U': '↑', 'D': '↓', 'R': '→', 'L': '←'}
 
         for row in self.maze.rows:
@@ -90,15 +113,16 @@ class MdpMaze(maze_generator.Maze):
                     value_text = str(round(cell.value, 3))
                     policy_text = arrow_symbols.get(cell.policy, str(cell.policy))
 
-                    plt.text(cell.x + 0.33, cell.y + 0.5, value_text, fontsize=8, ha='center', va='center', color='black')
                     plt.text(cell.x + 0.66, cell.y + 0.5, policy_text, fontsize=8, ha='center', va='center', color='black')
+
+                    if optimal_path and cell in optimal_path:
+                        plt.fill_between([cell.x, cell.x + 1], cell.y, cell.y + 1, color='yellow')
 
         plt.title('MDP Value Iteration Maze Visualization')
         plt.xlabel('X-axis')
         plt.gca().invert_yaxis()
         plt.ylabel('Y-axis')
         plt.show()
-
 
 
 
@@ -129,10 +153,7 @@ def get_neighbours(maze, cell, w, h):
 
 
 # MDP value iteration algorithm
-def value_iteration(maze: MdpMaze, w, h, gamma=0.9, error=1e-2, living_reward=-0.1, noise=0.2):
-    # policy = [['up' for i in range(len(maze[0]))] for j in range(len(maze))]
-    actions = ['U', 'D', 'R', 'L']
-
+def value_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15, living_reward=-0.1, noise=0.2):
     iterations = 0
     is_converging = True
     # iterate values until convergence
@@ -157,26 +178,20 @@ def value_iteration(maze: MdpMaze, w, h, gamma=0.9, error=1e-2, living_reward=-0
                         maze[y][x].new_value = v
                         is_converging = True
 
-            print(maze)
+            # print(maze)
         maze.complete_iteration()
         iterations += 1
-
-    # for i in range(h):
-    #     for j in range(w):
-    #         if maze[i][j] != 'w':
-    #             neighbours = get_neighbours(maze, maze[y][x], w, h)
-    #             action_values = {}
-    #             for action in neighbours:
-    #                 # Get coordinates of neighboring cell
-    #                 neighbour = neighbours[action]
-    #                 action_values[action] = maze[y][x].reward + gamma * maze[neighbour.y][neighbour.x].value
-    #             # Dictionary comprehension to get value associated with each action
-    #             maze[i][j].policy = max(action_values, key=action_values.get)
-    #             # Compare to previous policy
-    #         else:
-    #             maze[i][j].policy = 'w'
-
-    return maze
+    
+    print(f"Convergence complete in {iterations} iterations")
+    optimal_path = []
+    current_cell = start
+    while current_cell.get_state() != 'e':
+        optimal_path.append(current_cell)
+        action = current_cell.policy
+        current_cell = get_neighbours(maze, current_cell, w, h)[action]
+    if current_cell.get_state() == 'e':
+        optimal_path.append(current_cell)
+    return maze, optimal_path
 
 
 if __name__ == "__main__":
@@ -190,9 +205,18 @@ if __name__ == "__main__":
 
     maze = MdpMaze(w=args.width, h=args.height)
     start, end = maze.set_start_end_points()
-    start.reward = -10
-    end.reward = 10
-    maze = value_iteration(maze, args.width, args.height)
-    print(maze)
+    start.reward = -100
+    end.reward = 100
+    end.set_state('e')
+    # maze = value_iteration(maze, args.width, args.height)
+    # print(maze)
+    # print(f"({start.x}, {start.y})", f"({end.x}, {end.y})")
+    # maze.visualize_maze_matplotlib()
+    #     # Run value iteration
+    maze, optimal_path = value_iteration(maze, args.width, args.height, start=start, end=end)
+    
+
+    # Print maze and visualize with optimal path
+    # print(maze)
     print(f"({start.x}, {start.y})", f"({end.x}, {end.y})")
-    maze.visualize_maze_matplotlib()
+    maze.visualize_maze_matplotlib(optimal_path)
