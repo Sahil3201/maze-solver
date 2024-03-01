@@ -27,6 +27,9 @@ class Cell(object):
         self.g_score = float('inf')
         self.f_score = float('inf')
 
+    def __lt__(self, other):
+        return self.f_score < other.f_score
+
     def __str__(self):
         return f'({self.y},{self.x},{self._state})'
         # return self._state

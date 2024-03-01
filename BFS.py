@@ -1,11 +1,9 @@
+import time
 import maze_generator
 import argparse
 from collections import deque
 
-def bfs(w, h):
-    maze = maze_generator.prims_algo(w=w, h=h)
-    start, end = maze.set_start_end_points()
-    maze.visualize_maze()
+def bfs(maze, w, h, start, end):
     queue = deque([(start, [start])])
     while queue:
         curr, path = queue.popleft()
@@ -14,7 +12,6 @@ def bfs(w, h):
             print("FOUND THE PATH")
             for i in path:
                 i.set_state('r')
-            maze.visualize_maze(path=path)
             return path
 
         if curr.is_visited():
@@ -31,10 +28,31 @@ def bfs(w, h):
 if __name__=='__main__':
     parser = argparse.ArgumentParser(
         description='Generate a maze and use DFS to solve it.')
-    parser.add_argument('--height', type=int, default=45,
+    parser.add_argument('-l','--height', type=int, default=45,
                         help='Height of the maze')
-    parser.add_argument('--width', type=int, default=60,
+    parser.add_argument('-w','--width', type=int, default=60,
                         help='Width of the maze')
+    parser.add_argument('-v','--visualize', type=str, default='N',
+                        help='Visualize the maze? [Y/N]')
     args = parser.parse_args()
 
-    path = bfs(w=args.width, h=args.height)
+
+
+    maze = maze_generator.prims_algo(w=args.width, h=args.height)
+    start, end = maze.set_start_end_points()
+    if(args.visualize=='Y'):
+        maze.visualize_maze()
+
+    start_time = time.time()
+    path = bfs(maze, w=args.width, h=args.height)
+    print("time taken:", time.time()-start_time)
+    
+    cells_visited=0
+    for row in maze:
+        for cell in row:
+            if(cell.is_visited()):
+                cells_visited+=1
+    print("cells_visited:",cells_visited)
+
+    if(args.visualize=='Y'):
+        maze.visualize_maze(path=path)
