@@ -1,7 +1,7 @@
 import maze_generator
 import argparse
 import matplotlib.pyplot as plt
-
+import time
 
 class MdpCell(maze_generator.Cell):
     def __init__(self,  x, y, state='w', visited=False):
@@ -72,12 +72,12 @@ class MdpMaze(maze_generator.Maze):
                     plt.fill_between([cell.x + 0.5, cell.x + 1], cell.y,
                                      cell.y + 1, color='white', edgecolor='black')
 
-                    value_text = str(round(cell.value, 3))
+                    value_text = str(round(cell.value, 5))
                     policy_text = arrow_symbols.get(
                         cell.policy, str(cell.policy))
 
-                    plt.text(cell.x + 0.66, cell.y + 0.5, policy_text,
-                             fontsize=8, ha='center', va='center', color='black')
+                    plt.text(cell.x + 0.66, cell.y + 0.5, value_text,
+                             fontsize=4, ha='center', va='center', color='black')
 
                     if optimal_path and cell in optimal_path:
                         plt.fill_between([cell.x, cell.x + 1],
@@ -88,6 +88,7 @@ class MdpMaze(maze_generator.Maze):
         plt.gca().invert_yaxis()
         plt.ylabel('Y-axis')
         plt.show()
+        plt.get_current_fig_manager().full_screen_toggle()
 
 
 def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
@@ -101,9 +102,9 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
     # Policy iteration
     while is_policy_changed:
         is_policy_changed = False
-        is_value_changed = True
-        while is_value_changed:
-            is_value_changed = False
+        is_converging = True
+        while is_converging:
+            is_converging = False
             # Running value iteration for each state
             for row in maze:
                 for cell in row:
@@ -114,9 +115,10 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
                         neighbour = neighbours[cell.policy]
                         v = cell.reward + gamma * neighbour.value
                         # Compare to previous iteration
-                        if v != cell.value:
-                            is_value_changed = True
-                            cell.value = v
+                        if error < abs(v-cell.value):
+                            is_converging = True
+                            cell.new_value = v
+            maze.complete_iteration()
 
         # Policy improvement and policy evaluation
         # Once values have converged for the policy, update policy with greedy actions
@@ -131,15 +133,15 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
                     if best_action != cell.policy:
                         is_policy_changed = True
                         cell.policy = best_action
-
         iterations += 1
+
     print(f"Convergence complete in {iterations} iterations")
     optimal_path = []
     current_cell = start
     while current_cell.get_state() != 'e':
         optimal_path.append(current_cell)
         action = current_cell.policy
-        if(action=='w'):
+        if (action == 'w'):
             print("Something went wrong!")
             break
         current_cell = get_neighbours(maze, current_cell, w, h)[action]
@@ -151,10 +153,12 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Generate a maze and use Policy Iteration to create a policy to solve it.')
-    parser.add_argument('--height', type=int, default=45,
+    parser.add_argument('-l', '--height', type=int, default=45,
                         help='Height of the maze')
-    parser.add_argument('--width', type=int, default=60,
+    parser.add_argument('-w', '--width', type=int, default=60,
                         help='Width of the maze')
+    parser.add_argument('-v','--visualize', type=str, default='N',
+                        help='Visualize the maze? [Y/N]')
     args = parser.parse_args()
 
     maze = MdpMaze(w=args.width, h=args.height)
@@ -162,26 +166,13 @@ if __name__ == "__main__":
     start.reward = -100
     end.reward = 100
     end.set_state('e')
-    # maze = value_iteration(maze, args.width, args.height)
-    # print(maze)
-    # print(f"({start.x}, {start.y})", f"({end.x}, {end.y})")
-    # maze.visualize_maze_matplotlib()
-    #     # Run value iteration
-    maze, optimal_path = policy_iteration(maze, args.width, args.height, start, end)
+
+    start_time = time.time()
+    maze, optimal_path = policy_iteration(
+        maze, args.width, args.height, start, end)
+    print("time taken for Policy Iteration:", time.time()-start_time)
 
     # Print maze and visualize with optimal path
     print(f"({start.x}, {start.y})", f"({end.x}, {end.y})")
-    maze.visualize_maze_matplotlib(optimal_path)
-    # print(maze)
-
-
-# if __name__ == '__main__':
-#     maze
-
-#     test_maze = AldousBroder(3, 3).generate()
-#     test_mdp = maze_to_mdp(test_maze)
-#     test_policy = policy_iteration(test_mdp, .9)
-#     test_policy_str = prettify_policy(test_policy)
-
-#     print(test_maze)
-#     print(test_policy_str)
+    if (args.visualize == 'Y'):
+        maze.visualize_maze_matplotlib(optimal_path)
