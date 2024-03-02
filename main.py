@@ -6,7 +6,7 @@ import copy, time
 import psutil
 import matplotlib.pyplot as plt
 
-maze_sizes = [(10, 10), (50, 50), (100, 100)]#, (250, 250), (500, 500), (1000, 1000)]
+maze_sizes = [(10, 10), (50, 50), (100, 100), (250, 250), (500, 500), (1000, 1000)]
 
 # Lists to store metrics
 time_taken_data = {'bfs': [], 'dfs': [], 'a_star': []}
@@ -47,6 +47,8 @@ for i in maze_sizes:
         cells_visited_data[algo.__name__].append(cells_visited)
         memory_used_data[algo.__name__].append(memory_used)
 
+playsound.playsound('beep_3.mp3') # TODO remove
+
 # Plotting
 for metric_name, metric_data in zip(['Time Taken', 'Cells Visited', 'Memory Used'],
                                     [time_taken_data, cells_visited_data, memory_used_data]):
@@ -68,4 +70,3 @@ for size in maze_sizes:
               f"{cells_visited_data[algo.__name__].pop(0):<15}{memory_used_data[algo.__name__].pop(0):<15.2f}")
 
 
-playsound.playsound('beep_3.mp3')
