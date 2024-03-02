@@ -9,11 +9,8 @@
     Maze generation algo implemented: Iterative Randomized Prim's Algo
 """
 
-import random
+import random, os
 import argparse
-# import numpy as np
-import threading
-import os
 # To suppress a welcome message from pygame when we import pygame
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
@@ -101,6 +98,9 @@ class Maze(object):
         for i in self.rows:
             ret += str(i) + '\n'
         return ret
+
+    def h_func(self, cell):
+        return abs(cell.x - self.end.x) + abs(cell.y - self.end.y)
 
     def set_start_end_points(self):
         start = None
@@ -197,9 +197,9 @@ def prims_algo(w=20, h=20, maze=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate a maze')
-    parser.add_argument('--height', type=int, default=45,
+    parser.add_argument('-l','--height', type=int, default=45,
                         help='Height of the maze')
-    parser.add_argument('--width', type=int, default=60,
+    parser.add_argument('-w','--width', type=int, default=60,
                         help='Width of the maze')
     args = parser.parse_args()
 

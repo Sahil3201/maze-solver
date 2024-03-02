@@ -9,7 +9,7 @@ def bfs(maze, w, h, start, end):
         curr, path = queue.popleft()
 
         if curr==end:
-            print("FOUND THE PATH")
+            # print("FOUND THE PATH")
             for i in path:
                 i.set_state('r')
             return path
@@ -44,7 +44,7 @@ if __name__=='__main__':
         maze.visualize_maze()
 
     start_time = time.time()
-    path = bfs(maze, w=args.width, h=args.height)
+    path = bfs(maze, w=args.width, h=args.height, start=start, end=end)
     print("time taken:", time.time()-start_time)
     
     cells_visited=0

@@ -3,16 +3,8 @@ import argparse
 from queue import PriorityQueue
 import time
 
-class AStarMaze(maze_generator.Maze):
-    def __init__(self, w, h):
-        super().__init__(w, h)
-        self.maze = maze_generator.prims_algo(w, h, self)
 
-    def h_func(self, cell):
-        return abs(cell.x - self.end.x) + abs(cell.y - self.end.y)
-
-
-def a_star(maze: AStarMaze, w, h, start, end):
+def a_star(maze, w, h, start, end):
     start.g_score = 0
     start.f_score = maze.h_func(start)
 
@@ -61,8 +53,7 @@ if __name__ == '__main__':
                         help='Visualize the maze? [Y/N]')
     args = parser.parse_args()
 
-    maze = AStarMaze(w=args.width, h=args.height)
-    maze = maze_generator.prims_algo(w=args.width, h=args.height, maze=maze)
+    maze = maze_generator.prims_algo(w=args.width, h=args.height)
     start, end = maze.set_start_end_points()
 
     if args.visualize == 'Y':

@@ -8,7 +8,7 @@ def dfs(maze, w, h, start, end):
         curr, path = stack.pop()
 
         if curr==end:
-            print("FOUND THE PATH")
+            # print("FOUND THE PATH")
             for i in path:
                 i.set_state('r')
             return path
