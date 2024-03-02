@@ -1,0 +1,11 @@
+To create a maze and visualize it use:
+.\maze_generator.py -l 50 -w 150
+
+Command to run DFS algorithm:
+.\DFS.py -l 50 -w 100 -v Y
+
+Command to run BFS algorithm:
+.\BFS.py -l 50 -w 100 -v Y
+
+Command to run A* algorithm:
+.\astar.py -l 50 -w 100 -v Y
