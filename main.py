@@ -1,12 +1,10 @@
-# TODO: Remove
-import playsound 
-import dfs, bfs, astar
+import bfs, dfs, astar
 import maze_generator
 import copy, time
 import psutil
 import matplotlib.pyplot as plt
 
-maze_sizes = [(10, 10), (50, 50), (100, 100), (250, 250), (500, 500), (1000, 1000)]
+maze_sizes = [(50, 50), (100, 100), (250, 250), (500, 500), (1000, 1000)]
 
 # Lists to store metrics
 time_taken_data = {'bfs': [], 'dfs': [], 'a_star': []}
@@ -20,7 +18,7 @@ def memory_usage(func):
         result = func(*args, **kwargs)
         end_memory = process.memory_info().rss / 1024.0 / 1024.0  # in MB
         memory_used = end_memory - start_memory
-        print(f"Memory used by {func.__name__}: {memory_used:.2f} MB")
+        # print(f"Memory used by {func.__name__}: {memory_used:.2f} MB")
         return result, memory_used
 
     return wrapper
@@ -30,6 +28,7 @@ def run_algo(algo, *args):
     algo(*args)
 
 for i in maze_sizes:
+    print(f"Maze size: {i}")
     input_maze = maze_generator.prims_algo(w=i[0], h=i[1])
     
     for algo in [bfs.bfs, dfs.dfs, astar.a_star]:
@@ -46,8 +45,6 @@ for i in maze_sizes:
         time_taken_data[algo.__name__].append(time_taken)
         cells_visited_data[algo.__name__].append(cells_visited)
         memory_used_data[algo.__name__].append(memory_used)
-
-playsound.playsound('beep_3.mp3') # TODO remove
 
 # Plotting
 for metric_name, metric_data in zip(['Time Taken', 'Cells Visited', 'Memory Used'],

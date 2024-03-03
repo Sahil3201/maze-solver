@@ -67,17 +67,17 @@ class MdpMaze(maze_generator.Maze):
                     plt.fill_between([cell.x, cell.x + 1],
                                      cell.y, cell.y + 1, color='black')
                 else:
-                    plt.fill_between([cell.x, cell.x + 0.5], cell.y,
-                                     cell.y + 1, color='white', edgecolor='black')
-                    plt.fill_between([cell.x + 0.5, cell.x + 1], cell.y,
+                    # plt.fill_between([cell.x, cell.x + 0.5], cell.y,
+                    #                  cell.y + 1, color='white', edgecolor='black')
+                    plt.fill_between([cell.x, cell.x + 1], cell.y,
                                      cell.y + 1, color='white', edgecolor='black')
 
-                    value_text = str(round(cell.value, 5))
+                    # value_text = str(round(cell.value, 5))
                     policy_text = arrow_symbols.get(
                         cell.policy, str(cell.policy))
 
-                    plt.text(cell.x + 0.66, cell.y + 0.5, value_text,
-                             fontsize=4, ha='center', va='center', color='black')
+                    plt.text(cell.x + 0.5, cell.y + 0.5, policy_text,
+                             fontsize=8, ha='center', va='center', color='black')
 
                     if optimal_path and cell in optimal_path:
                         plt.fill_between([cell.x, cell.x + 1],
@@ -92,7 +92,7 @@ class MdpMaze(maze_generator.Maze):
 
 
 def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
-    is_policy_changed = True
+    policy_changing = True
 
     # policy = [['up' for i in range(len(grid[0]))] for j in range(len(grid))]
     actions = ['U', 'D', 'L', 'R']
@@ -100,11 +100,11 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
     iterations = 0
 
     # Policy iteration
-    while is_policy_changed:
-        is_policy_changed = False
-        is_converging = True
-        while is_converging:
-            is_converging = False
+    while policy_changing:
+        policy_changing = False
+        is_value_converging = True
+        while is_value_converging:
+            is_value_converging = False
             # Running value iteration for each state
             for row in maze:
                 for cell in row:
@@ -116,7 +116,7 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
                         v = cell.reward + gamma * neighbour.value
                         # Compare to previous iteration
                         if error < abs(v-cell.value):
-                            is_converging = True
+                            is_value_converging = True
                             cell.new_value = v
             maze.complete_iteration()
 
@@ -131,7 +131,7 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
                     best_action = max(action_values, key=action_values.get)
                     # Compare to previous policy
                     if best_action != cell.policy:
-                        is_policy_changed = True
+                        policy_changing = True
                         cell.policy = best_action
         iterations += 1
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     start_time = time.time()
     maze, optimal_path = policy_iteration(
         maze, args.width, args.height, start, end)
-    print("time taken for Policy Iteration:", time.time()-start_time)
+    print("time taken for Policy Iteration: {} seconds".format(round(time.time()-start_time, 3)))
 
     # Print maze and visualize with optimal path
     print(f"({start.x}, {start.y})", f"({end.x}, {end.y})")
