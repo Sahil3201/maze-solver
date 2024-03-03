@@ -2,94 +2,7 @@ import maze_generator
 import argparse
 import matplotlib.pyplot as plt
 import time
-
-class MdpCell(maze_generator.Cell):
-    def __init__(self,  x, y, state='w', visited=False):
-        super().__init__(x, y, state, visited)
-        self.policy = 'U'
-        self.value = 0
-        self.new_value = -1
-        self.reward = -0.1
-
-    def __str__(self):
-        # return str(self.value)[:5] if self._state!='w' else '    w'
-        return self.policy if self._state != 'w' else ' '
-
-
-def get_neighbours(maze, cell, w, h):
-    ret = {}
-    if (cell.x != 0):
-        ret['L'] = maze[cell.y][cell.x-1]
-    else:
-        ret['L'] = maze[cell.y][cell.x]
-    if (cell.x != w-1):
-        ret['R'] = maze[cell.y][cell.x+1]
-    else:
-        ret['R'] = maze[cell.y][cell.x]
-    if (cell.y != 0):
-        ret['U'] = maze[cell.y-1][cell.x]
-    else:
-        ret['U'] = maze[cell.y][cell.x]
-    if (cell.y != h-1):
-        ret['D'] = maze[cell.y+1][cell.x]
-    else:
-        ret['D'] = maze[cell.y][cell.x]
-    ret['N'] = maze[cell.y][cell.x]
-    # print(cell.get_state())
-    # if (cell.x==5 and cell.y==5):
-    #     for i in ret.keys():
-    #         print(ret[i])
-    return ret
-
-
-class MdpMaze(maze_generator.Maze):
-    def __init__(self, w, h):
-        super().__init__(w, h, CellDef=MdpCell)
-        self.maze = maze_generator.prims_algo(w, h, self)
-
-    def complete_iteration(self):
-        for i in maze:
-            for cell in i:
-                cell.value = cell.new_value
-
-    def __str__(self):
-        ret = ''
-        for i in self.rows:
-            ret += str(i) + '\n'
-        return ret
-
-    def visualize_maze_matplotlib(self, optimal_path=None):
-        arrow_symbols = {'U': '↑', 'D': '↓', 'R': '→', 'L': '←'}
-
-        for row in self.maze.rows:
-            for cell in row:
-                if cell.get_state() == 'w':
-                    plt.fill_between([cell.x, cell.x + 1],
-                                     cell.y, cell.y + 1, color='black')
-                else:
-                    # plt.fill_between([cell.x, cell.x + 0.5], cell.y,
-                    #                  cell.y + 1, color='white', edgecolor='black')
-                    plt.fill_between([cell.x, cell.x + 1], cell.y,
-                                     cell.y + 1, color='white', edgecolor='black')
-
-                    # value_text = str(round(cell.value, 5))
-                    policy_text = arrow_symbols.get(
-                        cell.policy, str(cell.policy))
-
-                    plt.text(cell.x + 0.5, cell.y + 0.5, policy_text,
-                             fontsize=8, ha='center', va='center', color='black')
-
-                    if optimal_path and cell in optimal_path:
-                        plt.fill_between([cell.x, cell.x + 1],
-                                         cell.y, cell.y + 1, color='yellow')
-
-        plt.title('MDP Policy Iteration Maze Visualization')
-        plt.xlabel('X-axis')
-        plt.gca().invert_yaxis()
-        plt.ylabel('Y-axis')
-        plt.show()
-        plt.get_current_fig_manager().full_screen_toggle()
-
+from mdp_maze_generator import *
 
 def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
     policy_changing = True
@@ -147,7 +60,7 @@ def policy_iteration(maze: MdpMaze, w, h, start, end, gamma=0.9, error=1e-15):
         current_cell = get_neighbours(maze, current_cell, w, h)[action]
     if current_cell.get_state() == 'e':
         optimal_path.append(current_cell)
-    return maze, optimal_path
+    return maze, optimal_path, iterations
 
 
 if __name__ == "__main__":
@@ -168,7 +81,7 @@ if __name__ == "__main__":
     end.set_state('e')
 
     start_time = time.time()
-    maze, optimal_path = policy_iteration(
+    maze, optimal_path, iterations = policy_iteration(
         maze, args.width, args.height, start, end)
     print("time taken for Policy Iteration: {} seconds".format(round(time.time()-start_time, 3)))
 
